@@ -1,17 +1,12 @@
 /* -------------------------------------------------------------------------- */
 void regulateTemperature(struct SolderingStation &station) {
-    if (station.mode < MODE_INACTIVE) {
-        regulateTemperatureActiveModes(station);
-    }
-    else {
-        regulateTemperatureInactive(station);
-    }
-
+    getTempReadout(station);
     getTempTrend(station);
+    calculateIronAndLed(station);
     regulateIron(station);
 }
 /* -------------------------------------------------------------------------- */
-void regulateTemperatureActiveModes(struct SolderingStation &station) {
+void getTempReadout(struct SolderingStation &station) {
     station.timerRegulate.currentMillis = millis();
 
     boolean tick = station.timerRegulate.currentMillis -
@@ -20,25 +15,33 @@ void regulateTemperatureActiveModes(struct SolderingStation &station) {
 
     if (tick == false) return;
 
-    station.tempSensor    = analogRead(PIN_T);
-    station.tempMeasured  = mapSensToTemp(station.tempSensor, station.currentSensor);
-    station.tempMeasured += station.userCalibration * station.userCalibrationStep;
+    // Serial.println("Read sensor");
+    station.previousTempMeasured = station.tempMeasured;
+    station.tempSensor           = analogRead(PIN_T);
+    station.tempMeasured         = mapSensToTemp(station.tempSensor, station.currentSensor);
+    station.tempMeasured        += station.userCalibration * station.userCalibrationStep;
+	// (int) mapSensToTemp() ?
+
+    if (station.tempMeasured < 0)                  station.tempMeasured = 0;
+    if (station.tempMeasured > TEMP_DISPLAY_LIMIT) station.tempMeasured = 0;
 
     #ifdef SAMPLE_SMOOTHING
         sampleSmoothingQueue(station);
     #else
         sampleSmoothingSimple(station);
     #endif
+    // station.tempDisplay = station.tempMeasured;
     
     station.previousTempDisplay          = station.tempDisplay;
-    station.previousTempMeasured         = station.tempMeasured;
     station.timerRegulate.previousMillis = station.timerRegulate.currentMillis;
 }
 /* -------------------------------------------------------------------------- */
-void regulateTemperatureInactive(struct SolderingStation &station) {
-    station.tempMeasured = TEMP_INACTIVE;
-    station.tempDisplay  = TEMP_INACTIVE;
-}
+// boolean regulateTemperatureActiveModes(struct SolderingStation &station) {
+    // station.tempMeasured = map(Station.tempSensor, 0, 1023, 200, 420);
+    // struct SensorInfo *s = station.currentSensor;
+    // station.tempMeasured = map(Station.tempSensor, s->ardVal1, s->ardVal2, s->t1, s->t2);
+    // station.tempMeasured = map(Station.tempSensor, station.currentSensor->ardVal1, station.currentSensor->ardVal2, station.currentSensor->t1, station.currentSensor->t2);
+// }
 /* -------------------------------------------------------------------------- */
 #ifdef SAMPLE_SMOOTHING
 
@@ -56,31 +59,53 @@ void sampleSmoothingSimple(struct SolderingStation &station) {
 
 #endif
 /* -------------------------------------------------------------------------- */
-void regulateIron(struct SolderingStation &station) {
+void calculateIronAndLed(struct SolderingStation &station) {
     #ifdef IRON_DEBUG
-        if (station.tempMeasured < station.tempSet) {
-            // digitalWrite(PIN_LED, HIGH);
-            PORTB = PORTB | MASK_PIN_LED;
-        }
-        else {
-            // digitalWrite(PIN_LED, LOW);
-            PORTB = PORTB & ~MASK_PIN_LED;
-        }
+
+    if (station.tempMeasured <= station.tempSet) {
+        station.isHeaterOn = 1;
+        station.isLedOn    = 1;
+    } else {
+        station.isHeaterOn = 0;
+        station.isLedOn    = 0;
+    }
+    
     #endif
 
     #ifdef IRON_LIVE
-    if (station.tempTrend > 0 && station.tempMeasured > station.tempSet + station.tempToleranceUp) {
-        // digitalWrite(PIN_LED, HIGH);
-        PORTB = PORTB | MASK_PIN_LED;
-        return;
+
+    if (station.tempTrend > 0) {
+        if (station.tempMeasured <= station.tempSet + station.tempToleranceUp) {
+            station.isHeaterOn = 1;
+            station.isLedOn    = 1;
+        } else {
+            station.isHeaterOn = 0;
+            station.isLedOn    = 0;
+        }
+    } else {
+        if (station.tempMeasured > station.tempSet - station.tempToleranceDown) {
+            station.isHeaterOn = 0;
+            station.isLedOn    = 0;
+            return;
+        } else {
+            station.isHeaterOn = 1;
+            station.isLedOn    = 1;
+            return;
+        }
     }
 
-    if (station.tempTrend < 0 && station.tempMeasured < station.tempSet - station.tempToleranceDown) {
+    #endif
+}
+/* -------------------------------------------------------------------------- */
+void regulateIron(struct SolderingStation &station) {
+    if (station.isHeaterOn) {
+        // digitalWrite(PIN_LED, HIGH);
+        PORTB = PORTB | MASK_PIN_LED;
+    }
+    else {
         // digitalWrite(PIN_LED, LOW);
         PORTB = PORTB & ~MASK_PIN_LED;
-        return;
     }
-    #endif
 }
 /* -------------------------------------------------------------------------- */
 int limitSetTemp(int position, int limit_1, int limit_2) {
@@ -96,7 +121,11 @@ int limitSetTemp(int position, int limit_1, int limit_2) {
 }
 /* -------------------------------------------------------------------------- */
 int mapSensToTemp(float sensVal, struct SensorInfo *sensor) {
-    return (int) (sensor->tempRef + (sensVal - sensor->adcRef) * sensor->slope + sensor->calibration);
+    if (sensVal <= sensor->adcRef) {
+        return (int) (sensor->tempRef + (sensVal - sensor->adcRef) * sensor->slopeLow  + sensor->calibration);
+    } else {
+        return (int) (sensor->tempRef + (sensVal - sensor->adcRef) * sensor->slopeHigh + sensor->calibration);
+    }
 }
 /* -------------------------------------------------------------------------- */
 void getTempTrend(struct SolderingStation &station) {
@@ -113,4 +142,3 @@ void getTempTrend(struct SolderingStation &station) {
     station.tempTrend = 0;
 }
 /* -------------------------------------------------------------------------- */
-

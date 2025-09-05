@@ -19,6 +19,8 @@ void getFps(unsigned long &counter, unsigned long &previousMilliseconds, unsigne
 void regulateClock(struct SolderingStation &station) {
     int t  = (millis() - station.initMillis) / 1000;
     
+    // Serial.println("regulate clock");
+    
     station.clock.hour   = t / 3600;
     station.clock.minute = (t % 3600) / 60;
     station.clock.second = t % 60;

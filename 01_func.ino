@@ -7,9 +7,10 @@ void initSensorsInfo(struct SolderingStation &station) {
 
     sprintf(SENSOR_01.name, "A1321");
 	SENSOR_01.tempRef     = SENSOR_TEMP_REF;
-    SENSOR_01.adcRef      = 479.00;
-    SENSOR_01.slope       = 2.4561;
-    SENSOR_01.calibration = -100.00;
+    SENSOR_01.adcRef      = 402.0;
+    SENSOR_01.slopeLow    = 1.1;
+    SENSOR_01.slopeHigh   = 0.9;
+    SENSOR_01.calibration = 0;
 
 	/* ----- SENSOR #2 (A1322) ----- */	
 
@@ -17,8 +18,9 @@ void initSensorsInfo(struct SolderingStation &station) {
 
     sprintf(SENSOR_02.name, "A1322");
     SENSOR_02.tempRef     = SENSOR_TEMP_REF;
-	SENSOR_02.adcRef      = 415.00;
-    SENSOR_02.slope       = 0.7932;
+	SENSOR_02.adcRef      = 490;
+    SENSOR_02.slopeLow    = 0.69;
+    SENSOR_02.slopeHigh   = 0.45;
     SENSOR_02.calibration = 0;
 
     #ifndef SAMPLE_SMOOTHING
@@ -28,48 +30,33 @@ void initSensorsInfo(struct SolderingStation &station) {
     station.sensors[2] = &SENSOR_03;
 
     sprintf(SENSOR_03.name, "TK-12");
-    SENSOR_03.tempRef = SENSOR_TEMP_REF;
-    SENSOR_03.adcRef  = 415;
-    SENSOR_03.slope   = 0.7932;
+    SENSOR_03.tempRef     = SENSOR_TEMP_REF;
+    SENSOR_03.adcRef      = 415;
+    SENSOR_03.slopeLow    = 0.7932;
+    SENSOR_03.slopeHigh   = 0.7932;
     SENSOR_03.calibration = 0;
 
     /* ----- SENSOR #4 (TK-16) ----- */
 
-    station.sensors[3] = &SENSOR_04;
+    // station.sensors[3] = &SENSOR_04;
     
-    sprintf(SENSOR_04.name, "TK-X4");
-    SENSOR_04.tempRef = SENSOR_TEMP_REF;
-    SENSOR_04.adcRef  = 415;
-    SENSOR_04.slope   = 0.7932;
-    SENSOR_04.calibration = 0;
+    // sprintf(SENSOR_04.name, "TK-X4");
+    // SENSOR_04.tempRef     = SENSOR_TEMP_REF;
+    // SENSOR_04.adcRef      = 415;
+    // SENSOR_04.slopeLow    = 0.7932;
+    // SENSOR_04.slopeHigh   = 0.7932;
+    // SENSOR_04.calibration = 0;
 
     /* ----- SENSOR #5 (TK-18) ----- */
 
-    station.sensors[4] = &SENSOR_05;
+    // station.sensors[4] = &SENSOR_05;
     
-    sprintf(SENSOR_05.name, "TK-X5");
-    SENSOR_05.tempRef = SENSOR_TEMP_REF;
-    SENSOR_05.adcRef  = 415;
-    SENSOR_05.slope   = 0.7932;
-    SENSOR_05.calibration = 0;
-
-    /* ----- SENSOR #6 (TK-20) ----- */
-
-    // station.sensors[5] = &SENSOR_06;
-    
-    // sprintf(SENSOR_06.name, "TK-X6");
-    // SENSOR_06.tempRef = SENSOR_TEMP_REF;
-    // SENSOR_06.adcRef  = 415;
-    // SENSOR_06.slope   = 0.7932;
-
-    /* ----- SENSOR #7 (TK-22) ----- */
-
-    // station.sensors[6] = &SENSOR_07;
-    
-    // sprintf(SENSOR_07.name, "TK-X7");
-    // SENSOR_07.tempRef = SENSOR_TEMP_REF;
-    // SENSOR_07.adcRef  = 415;
-    // SENSOR_07.slope   = 0.7932;
+    // sprintf(SENSOR_05.name, "TK-X5");
+    // SENSOR_05.tempRef     = SENSOR_TEMP_REF;
+    // SENSOR_05.adcRef      = 415;
+    // SENSOR_05.slopeLow    = 0.7932;
+    // SENSOR_05.slopeHigh   = 0.7932;
+    // SENSOR_05.calibration = 0;
 
     #endif
 }
@@ -89,12 +76,17 @@ void initTimersInfo(struct SolderingStation &station) {
 
     station.timerCalSens.time    = TIMER_SENS_DEF;
     station.timerCalSens.trigger = false;
+    // station.timerCalSens.previousMillis = 0;
 
     station.timerInactive.time           = TIMER_INACTIVE_DEF; // 0
     station.timerInactive.previousMillis = station.timerInactive.currentMillis;
     station.timerInactive.trigger        = true;
+    // station.timerInactive.currentMillis  = millis();
 
     station.timerRegulate.time = TEMP_READ_RATE;
+
+    // station.timerClock.time           = TEMP_READ_RATE;
+    // station.timerClock.previousMillis = millis();
 }
 /* -------------------------------------------------------------------------- */
 void readPin_A() {
@@ -106,6 +98,8 @@ void readPin_B() {
 }
 /* -------------------------------------------------------------------------- */
 void regulateTimer(struct Timer &timer, struct SolderingStation &station) {
+    // TODO !!!
+    // if (timer.trigger == false && station.timerCalSens.trigger == true) return;
     if (timer.trigger == false) return;
 
     timer.currentMillis = millis();
@@ -115,6 +109,7 @@ void regulateTimer(struct Timer &timer, struct SolderingStation &station) {
 
     timer.previousMillis = timer.currentMillis;
     initModeDefault(station);
+    // Serial.println("regulate timer");
 }
 /* -------------------------------------------------------------------------- */
 void regulateTimerAux(struct Timer &timer) {
@@ -138,6 +133,9 @@ void correctTimerInactive(struct SolderingStation &station) {
 
     station.timerInactive.trigger = false;
     station.mode                  = MODE_INACTIVE;
+    // station.tempSetSave           = station.tempSet;
+    station.tempSet               = TEMP_INACTIVE;
+    // Serial.println(station.tempSetSave);
 }
 /* -------------------------------------------------------------------------- */
 void resetTimerInactive(struct SolderingStation &station) {
@@ -154,6 +152,7 @@ void initModeDefault(struct SolderingStation &station) {
     station.timerCalSens.trigger = false;
     station.previousMode         = station.mode;
     station.mode                 = MODE_DEFAULT;
+    station.tempSet              = station.tempSetSave;
 }
 /* -------------------------------------------------------------------------- */
 void initModeSetTemp(struct SolderingStation &station) {
@@ -182,6 +181,13 @@ void initModeCalibration(struct SolderingStation &station) {
         if (station.previousMode != MODE_SET_CAL) Serial.println("INIT Calibration");
     #endif
 
+    // if (station.click) {
+    //     station.timerCalSens.trigger = true;
+    // }
+    // else {
+    //     station.timerCalSens.trigger = false;
+    // }
+
     station.previousMode            = station.mode;
     station.mode                    = MODE_SET_CAL;
     station.timerCalSens.time       = 0;
@@ -209,11 +215,25 @@ void auxSerialWriteInfo(char *name, struct SolderingStation station) {
 
     switch (station.mode) {
         case MODE_SET_TEMP: Serial.println(station.tempSet);             break;
-        case MODE_SET_CAL:  Serial.println(station.userCalibration);         break;
+        case MODE_SET_CAL:  Serial.println(station.userCalibration);     break;
         case MODE_SEL_SENS: Serial.println(station.currentSensor->name); break;
         default: break;
     }
 }
+/* -------------------------------------------------------------------------- */
+// void auxSerialWriteDebug(char *name, int tick, struct SolderingStation station) {
+//     Serial.print("(");
+//     Serial.print(station.mode);
+//     Serial.print(") ");
+//     Serial.print(name);
+    
+//     if (tick > 0) {
+//         Serial.println(" + 1");
+//     }
+//     else {
+//         Serial.println(" - 1");
+//     }
+// }
 /* -------------------------------------------------------------------------- */
 // old (A = 2; B = 3): [ 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0 ]
 // new (A = 2; B = 3): [ 0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0 ]
@@ -278,8 +298,10 @@ void encoderTurn(int8_t tick, struct SolderingStation &station) {
 
     if (station.mode < MODE_SET_CAL) {
         initModeSetTemp(station);
-        station.tempSet += tick * station.acc;
-        station.tempSet  = limitSetTemp(station.tempSet, TEMP_SET_MIN, TEMP_SET_MAX);
+        // station.previousTempSet = station.tempSet;
+        station.tempSet    += tick * station.acc;
+        station.tempSet     = limitSetTemp(station.tempSet, TEMP_SET_MIN, TEMP_SET_MAX);
+        station.tempSetSave = station.tempSet;
         
         #ifdef SERIAL_MESSAGES_INFO
             auxSerialWriteInfo("Temperature", station);
@@ -290,6 +312,7 @@ void encoderTurn(int8_t tick, struct SolderingStation &station) {
 
     if (station.mode == MODE_SET_CAL || station.mode == MODE_BTN_HOLD) { // TODO !!!!
         initModeCalibration(station);
+        // station.previousCalibration = station.calibration;
         station.userCalibration += tick;
         
         #ifdef SERIAL_MESSAGES_INFO
@@ -327,13 +350,18 @@ void selectSensor(int8_t tick, struct SolderingStation &station) {
         station.sensorIndex = 1;
     }
 
+    // station.previousSensor = station.currentSensor;
     station.currentSensor  = station.sensors[station.sensorIndex - 1]; // -1 (it's not 0 any more)
 }
 /* -------------------------------------------------------------------------- */
 void regulateLoop_Default(struct SolderingStation &station, Adafruit_SH1106 &display) {
     #ifdef OLED_DRAW
         // Serial.println("Default draw");
-        drawDefault(station, display);
+        if (station.tempMeasured < TEMP_NO_TIP) {
+            drawDefault(station, display);
+        } else {
+            drawNoTip(station, display);
+        }
     #endif
 }
 /* -------------------------------------------------------------------------- */

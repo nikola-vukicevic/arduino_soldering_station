@@ -1,6 +1,7 @@
 /* -------------------------------------------------------------------------- */
 #include "config.h"
 /* -------------------------------------------------------------------------- */
+// Adafruit_SH1106G Display = Adafruit_SH1106G(128, 64, &Wire, -1);
 Adafruit_SH1106 Display(OLED_RESET);
 struct SolderingStation Station;
 struct SensorInfo SENSOR_01;
@@ -10,6 +11,7 @@ struct SensorInfo SENSOR_03;
 struct SensorInfo SENSOR_04;
 struct SensorInfo SENSOR_05;
 #endif
+// struct StationClock Clock;
 unsigned long Counter, CounterFps, PreviousMilliseconds;
 /* -------------------------------------------------------------------------- */
 void setup() {
@@ -27,22 +29,26 @@ void setup() {
 
     initTimersInfo(Station);
     initSensorsInfo(Station);
-    Station.currentSensor = Station.sensors[0];
+    Station.currentSensor = Station.sensors[1];
+    // initSensorsInfoDodatni(Station);
     #ifdef SAMPLE_SMOOTHING
         initQueue(&Station.queue, TEMP_SAMP_AVG);
     #endif
 
     delay(PWUP_DELAY);
     Display.begin();
+    // Display.begin(0x3C, true);
+    // Display.setContrast(0);
 
     Counter    = 0;
     CounterFps = 0;
 
     Station.mode                 = MODE_DEFAULT;
-    Station.turnReadout          = 3; // 11 bin
+    Station.turnReadout          = 0b11; // 11 bin
     Station.previousClick        = 0;
     Station.acc                  = 5;
-    Station.tempSet              = 250;
+    Station.tempSet              = TEMP_DEFAULT;
+    Station.tempSetSave          = TEMP_DEFAULT;
     Station.userCalibration      = 0;
     Station.userCalibrationStep  = 10;
     Station.sensorIndex          = 1;
@@ -60,7 +66,7 @@ void loop() {
         
     Station.click = !(PIND & MASK_PIN_K); // !digitalRead(PIN_K);
 
-    regulateTemperature(Station); // iron ON/OFF regulated here, as well as sample smoothing
+    regulateTemperature(Station);    // iron ON/OFF regulated here, as well as sample smoothing
     regulateClock(Station);
 
     if (Station.click == 1 || Station.previousClick == 1) {

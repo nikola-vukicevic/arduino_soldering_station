@@ -2,8 +2,8 @@
 #include <Adafruit_SH1106.h>
 /* -------------------------------------------------------------------------- */
 #define OLED_DRAW
-#define IRON_DEBUG
-// #define IRON_LIVE
+// #define IRON_DEBUG
+#define IRON_LIVE
 // #define DRAW_COUNTER
 #define DRAW_CLOCK
 #define SERIAL_MESSAGES_FPS
@@ -26,13 +26,16 @@
 #define MASK_PINS_AB        0b00001100  // set according to values of PIN_A and PIN_B
 #define MASK_PIN_LED        0b00000100  // set according to value of PIN_LED
 #define TEMP_SET_MIN        200
-#define TEMP_SET_MAX        480
+#define TEMP_SET_MAX        420
+#define TEMP_DEFAULT        250
 #define TEMP_INACTIVE       200
+#define TEMP_NO_TIP         435
+#define TEMP_DISPLAY_LIMIT  999
 #define TIMER_SET_T_DEF     600    // Default time (ms) for exiting set temp mode
-#define TIMER_SET_C_DEF     1600   // Default time (ms) for exiting calibration mode
-#define TIMER_SEL_S_DEF     2000   // Default time (ms) for exiting select sensor mode
-#define TIMER_SENS_DEF      1600   // Default time (ms) for entering select sensor mode
-#define TIMER_INACTIVE_DEF  24000  // Default time (ms) for entering inactive mode
+#define TIMER_SET_C_DEF     2400   // Default time (ms) for exiting calibration mode
+#define TIMER_SEL_S_DEF     2400   // Default time (ms) for exiting select sensor mode
+#define TIMER_SENS_DEF      1200   // Default time (ms) for entering select sensor mode
+#define TIMER_INACTIVE_DEF  300000 // Default time (ms) for entering inactive mode
 #define TEMP_COORD_X        48
 #define TEMP_COORD_Y        31
 #define LED_COORD_X         15
@@ -44,25 +47,26 @@
 #define MODE_SEL_SENS       5
 #define MODE_INACTIVE       6
 #define TEMP_TOLERANCE_UP   5
-#define TEMP_TOLERANCE_DOWN 10
+#define TEMP_TOLERANCE_DOWN 5
 #define TEMP_READ_RATE      100 // milliseconds
 #define SENSOR_TEMP_REF     330
 #ifdef SAMPLE_SMOOTHING
     #define SENSOR_COUNT   2
     #define TEMP_SAMP_AVG  6
 # else
-    #define SENSOR_COUNT   5
+    #define SENSOR_COUNT   3
 #endif
 /* -------------------------------------------------------------------------- */
 struct Timer {
-    unsigned time;
+    unsigned long time;
     unsigned long currentMillis, previousMillis;
     boolean trigger;
 };
 /* -------------------------------------------------------------------------- */
 struct SensorInfo {
     float   tempRef;
-    float   slope;
+    float   slopeLow;
+    float   slopeHigh;
     int16_t adcRef;
     int16_t calibration;
     char    name[6];
@@ -95,10 +99,13 @@ struct StationQueue {
 struct SolderingStation {
     uint8_t  turnReadout;
     uint16_t tempSet;
+    uint16_t tempSetSave;
     uint16_t tempSensor;
     uint8_t  acc;
     uint8_t  click;
     uint8_t  previousClick;
+    uint8_t  isHeaterOn;
+    uint8_t  isLedOn;
     uint16_t tempMeasured;
     uint16_t previousTempMeasured;
     uint16_t tempDisplay;

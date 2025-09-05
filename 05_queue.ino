@@ -31,12 +31,13 @@ void initQueue(struct StationQueue *q, int size) {
 void addQueueNode(struct StationQueue *q, int newNodeVal) {
 	// remove the value of first node from sum:
 	q->sum -= q->last->val;
+	// printf("removed: %d\n", q->last->val);
 
 	// shft pointers:
 	q->first = q->first->prev;
 	q->last  = q->last->prev;
 
-	// add new value to queue (and to the overall sum):
+	// add new value to queue (and to sum):
 	q->sum       += newNodeVal;
 	q->first->val = newNodeVal;
 }

@@ -29,6 +29,7 @@ void drawDefault(struct SolderingStation &station, Adafruit_SH1106 &display) {
         display.setTextSize(1);
         display.println("C/S");
         display.println("MODE");
+        // display.println("CHOICE");
     }
 
     display.display();
@@ -48,6 +49,11 @@ void drawSetTemp(struct SolderingStation &station, Adafruit_SH1106 &display) {
     // drawClock(station, display);
 
     drawBigTemp(display, station.tempSet);
+    // display.setTextColor(WHITE);
+    // display.setTextSize(4);
+    // display.setCursor(TEMP_COORD_X, TEMP_COORD_Y);
+    // display.print(station.tempSet);
+
     drawLed(station, display);
     
     display.display();
@@ -79,6 +85,10 @@ void drawSelectSensor(struct SolderingStation station, Adafruit_SH1106 &display)
     display.setTextColor(WHITE);
     display.setTextSize(1);
     display.setCursor(0, 0);
+    // char s[15];
+    // sprintf(s, "SENSOR: (#%d)", station.sensorIndex);
+    // display.print(s);
+    // display.print(String("SENSOR: (-") + station.sensorIndex + String(")"));
     display.print("SENSOR: (#");
     display.print(station.sensorIndex);
     display.print(")");
@@ -89,7 +99,33 @@ void drawSelectSensor(struct SolderingStation station, Adafruit_SH1106 &display)
     display.setTextColor(WHITE);
     display.setTextSize(3);
     display.setCursor(8, 34);
+
+    // sensorInfo* s = station.sensors + station.sensorIndex;
     display.print(station.currentSensor->name);
+
+    display.display();
+}
+/* -------------------------------------------------------------------------- */
+void drawNoTip(struct SolderingStation &station, Adafruit_SH1106 &display) {
+    display.clearDisplay();
+
+    // display.setFont(&FreeMono9pt7b);
+    display.setTextColor(WHITE);
+    display.setTextSize(1);
+    display.setCursor(0, 0);
+    display.print("Set:");
+    display.print(station.tempSet);
+
+    drawCalibrationInfo(station, display);
+    drawSensorInfo(station, display);
+    drawClock(station, display);
+
+    display.setTextColor(WHITE);
+    display.setTextSize(2);
+    display.setCursor(0, 36);
+    
+    // display.print("Time out      (");
+    display.print("> No tip!");
 
     display.display();
 }
@@ -101,22 +137,37 @@ void drawInactive(struct SolderingStation &station, Adafruit_SH1106 &display) {
     display.setTextSize(1);
     display.setCursor(0, 0);
     
-    display.print("Inactive");
+    // display.print("Time out      (");
+    display.print("SLEEP");
+
     drawSensorInfo(station, display);
+
+    // drawCounter(display, counter);
     drawClock(station, display);
   
+    drawSmallTemp(display, station.tempDisplay);
+    drawLed(station, display);
     display.setCursor(TEMP_COORD_X, TEMP_COORD_Y);
     display.setTextColor(WHITE);
     display.setTextSize(4);
     display.print("---");
 
-    display.drawCircle(124, TEMP_COORD_Y + 2, 2, WHITE);
-    display.setCursor(122, TEMP_COORD_Y + 8);
-    display.setTextSize(1);
-    display.print("C");
+    // display.drawCircle(124, TEMP_COORD_Y + 2, 2, WHITE);
+    // display.setCursor(122, TEMP_COORD_Y + 8);
+    // display.setTextSize(1);
+    // display.print("C");
 
     display.display();
 }
+/* -------------------------------------------------------------------------- */
+// void drawCounter(Adafruit_SH1106 &display, int counter) {
+//     #ifdef DRAW_COUNTER
+//     display.setCursor(0, 12);
+//     display.setTextColor(WHITE);
+//     display.setTextSize(1);
+//     display.print(counter);
+//     #endif
+// }
 /* -------------------------------------------------------------------------- */
 void drawClock(struct SolderingStation &station, Adafruit_SH1106 &display) {
     #ifdef DRAW_CLOCK
@@ -140,7 +191,7 @@ void drawClock(struct SolderingStation &station, Adafruit_SH1106 &display) {
 }
 /* -------------------------------------------------------------------------- */
 void drawLed(struct SolderingStation &station, Adafruit_SH1106 &display) {
-    if (station.tempSet > station.tempMeasured && station.mode != MODE_BTN_HOLD) {
+    if (station.isLedOn && station.mode != MODE_BTN_HOLD) {
         display.drawCircle(LED_COORD_X, LED_COORD_Y, 8, WHITE);
         display.fillCircle(LED_COORD_X, LED_COORD_Y, 4, WHITE);
     }
@@ -153,6 +204,15 @@ void drawBigTemp(Adafruit_SH1106 &display, int temp) {
     display.print(temp);
 }
 /* -------------------------------------------------------------------------- */
+void drawSmallTemp(Adafruit_SH1106 &display, int temp) {
+    display.setCursor(32, 0);
+    display.setTextColor(WHITE);
+    display.setTextSize(1);
+    display.print("(");
+    display.print(temp);
+    display.print("C)");
+}
+/* -------------------------------------------------------------------------- */
 void drawSensorInfo(struct SolderingStation &station, Adafruit_SH1106 &display) {
     display.setCursor(86, 0);
     // display.print("#");
@@ -162,7 +222,7 @@ void drawSensorInfo(struct SolderingStation &station, Adafruit_SH1106 &display) 
 }
 /* -------------------------------------------------------------------------- */
 void drawCalibrationInfo(struct SolderingStation &station, Adafruit_SH1106 &display) {
-    display.setCursor(46, 0);
+    display.setCursor(52, 0);
     display.setTextColor(WHITE);
     display.setTextSize(1);
 
@@ -176,4 +236,3 @@ void drawCalibrationInfo(struct SolderingStation &station, Adafruit_SH1106 &disp
     }
 }
 /* -------------------------------------------------------------------------- */
-
