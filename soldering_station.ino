@@ -9,7 +9,7 @@ struct SensorInfo SENSOR_02;
 #ifndef SAMPLE_SMOOTHING
 struct SensorInfo SENSOR_03;
 struct SensorInfo SENSOR_04;
-struct SensorInfo SENSOR_05;
+// struct SensorInfo SENSOR_05;
 #endif
 // struct StationClock Clock;
 unsigned long Counter, CounterFps, PreviousMilliseconds;
@@ -66,7 +66,7 @@ void loop() {
         
     Station.click = !(PIND & MASK_PIN_K); // !digitalRead(PIN_K);
 
-    regulateTemperature(Station);    // iron ON/OFF regulated here, as well as sample smoothing
+    regulateTemperature(Station); // iron ON/OFF regulated here, as well as sample smoothing
     regulateClock(Station);
 
     if (Station.click == 1 || Station.previousClick == 1) {

@@ -15,8 +15,8 @@ void drawDefault(struct SolderingStation &station, Adafruit_SH1106 &display) {
     drawBigTemp(display, station.tempDisplay);
     drawClock(station, display);
 
-    display.drawCircle(124, TEMP_COORD_Y + 2, 2, WHITE);
-    display.setCursor(122, TEMP_COORD_Y + 8);
+    display.drawCircle(124, COORD_Y_TEMP + 2, 2, WHITE);
+    display.setCursor(122, COORD_Y_TEMP + 8);
     display.setTextSize(1);
     display.print("C");
     
@@ -147,7 +147,7 @@ void drawInactive(struct SolderingStation &station, Adafruit_SH1106 &display) {
   
     drawSmallTemp(display, station.tempDisplay);
     drawLed(station, display);
-    display.setCursor(TEMP_COORD_X, TEMP_COORD_Y);
+    display.setCursor(COORD_X_TEMP, COORD_Y_TEMP);
     display.setTextColor(WHITE);
     display.setTextSize(4);
     display.print("---");
@@ -192,13 +192,13 @@ void drawClock(struct SolderingStation &station, Adafruit_SH1106 &display) {
 /* -------------------------------------------------------------------------- */
 void drawLed(struct SolderingStation &station, Adafruit_SH1106 &display) {
     if (station.isLedOn && station.mode != MODE_BTN_HOLD) {
-        display.drawCircle(LED_COORD_X, LED_COORD_Y, 8, WHITE);
-        display.fillCircle(LED_COORD_X, LED_COORD_Y, 4, WHITE);
+        display.drawCircle(COORD_X_LED, COORD_Y_LED, 8, WHITE);
+        display.fillCircle(COORD_X_LED, COORD_Y_LED, 4, WHITE);
     }
 }
 /* -------------------------------------------------------------------------- */
 void drawBigTemp(Adafruit_SH1106 &display, int temp) {
-    display.setCursor(TEMP_COORD_X, TEMP_COORD_Y);
+    display.setCursor(COORD_X_TEMP, COORD_Y_TEMP);
     display.setTextColor(WHITE);
     display.setTextSize(4);
     display.print(temp);

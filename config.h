@@ -25,31 +25,36 @@
 #define MASK_PIN_K          0b00010000  // set according to value of PIN_K
 #define MASK_PINS_AB        0b00001100  // set according to values of PIN_A and PIN_B
 #define MASK_PIN_LED        0b00000100  // set according to value of PIN_LED
-#define TEMP_SET_MIN        200
-#define TEMP_SET_MAX        420
-#define TEMP_DEFAULT        250
-#define TEMP_INACTIVE       200
-#define TEMP_NO_TIP         435
-#define TEMP_DISPLAY_LIMIT  999
-#define TIMER_SET_T_DEF     600    // Default time (ms) for exiting set temp mode
-#define TIMER_SET_C_DEF     2400   // Default time (ms) for exiting calibration mode
-#define TIMER_SEL_S_DEF     2400   // Default time (ms) for exiting select sensor mode
-#define TIMER_SENS_DEF      1200   // Default time (ms) for entering select sensor mode
-#define TIMER_INACTIVE_DEF  300000 // Default time (ms) for entering inactive mode
-#define TEMP_COORD_X        48
-#define TEMP_COORD_Y        31
-#define LED_COORD_X         15
-#define LED_COORD_Y         45
+/* Modes */
 #define MODE_DEFAULT        1
 #define MODE_SET_TEMP       2
 #define MODE_BTN_HOLD       3
 #define MODE_SET_CAL        4
 #define MODE_SEL_SENS       5
 #define MODE_INACTIVE       6
+/* Temperatures */
+#define TEMP_SET_MIN        200
+#define TEMP_SET_MAX        420
+#define TEMP_DEFAULT        250
+#define TEMP_INACTIVE       200
+#define TEMP_NO_TIP         435
+#define TEMP_DISPLAY_LIMIT  999
 #define TEMP_TOLERANCE_UP   5
 #define TEMP_TOLERANCE_DOWN 5
 #define TEMP_READ_RATE      100 // milliseconds
 #define SENSOR_TEMP_REF     330
+/* Timers */
+#define TIMER_SET_T_DEF     600    // Default time (ms) for exiting set temp mode
+#define TIMER_SET_C_DEF     2400   // Default time (ms) for exiting calibration mode
+#define TIMER_SEL_S_DEF     2400   // Default time (ms) for exiting select sensor mode
+#define TIMER_SENS_DEF      1200   // Default time (ms) for entering select sensor mode
+#define TIMER_INACTIVE_DEF  300000 // Default time (ms) for entering inactive mode
+/* Display */
+#define COORD_X_TEMP        48
+#define COORD_Y_TEMP        31
+#define COORD_X_LED         15
+#define COORD_Y_LED         45
+/* Smoothing */
 #ifdef SAMPLE_SMOOTHING
     #define SENSOR_COUNT   2
     #define TEMP_SAMP_AVG  6
