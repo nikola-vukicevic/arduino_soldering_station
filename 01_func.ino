@@ -8,7 +8,7 @@ void initSensorsInfo(struct SolderingStation &station) {
     sprintf(SENSOR_01.name, "A1321");
 	SENSOR_01.tempRef     = SENSOR_TEMP_REF;
     SENSOR_01.adcRef      = 402.0;
-    SENSOR_01.slopeLow    = 1.1;
+    SENSOR_01.slopeLow    = 1.0575;
     SENSOR_01.slopeHigh   = 0.9;
     SENSOR_01.calibration = 0;
 
@@ -19,7 +19,7 @@ void initSensorsInfo(struct SolderingStation &station) {
     sprintf(SENSOR_02.name, "A1322");
     SENSOR_02.tempRef     = SENSOR_TEMP_REF;
 	SENSOR_02.adcRef      = 490;
-    SENSOR_02.slopeLow    = 0.69;
+    SENSOR_02.slopeLow    = 0.672;
     SENSOR_02.slopeHigh   = 0.45;
     SENSOR_02.calibration = 0;
 
@@ -29,7 +29,7 @@ void initSensorsInfo(struct SolderingStation &station) {
 
     station.sensors[2] = &SENSOR_03;
 
-    sprintf(SENSOR_03.name, "TK-12");
+    sprintf(SENSOR_03.name, "T245");
     SENSOR_03.tempRef     = SENSOR_TEMP_REF;
     SENSOR_03.adcRef      = 415;
     SENSOR_03.slopeLow    = 0.7932;
@@ -133,8 +133,8 @@ void correctTimerInactive(struct SolderingStation &station) {
 
     station.timerInactive.trigger = false;
     station.mode                  = MODE_INACTIVE;
-    // station.tempSetSave           = station.tempSet;
     station.tempSet               = TEMP_INACTIVE;
+    beep(station);
     // Serial.println(station.tempSetSave);
 }
 /* -------------------------------------------------------------------------- */
@@ -299,8 +299,8 @@ void encoderTurn(int8_t tick, struct SolderingStation &station) {
     if (station.mode < MODE_SET_CAL) {
         initModeSetTemp(station);
         // station.previousTempSet = station.tempSet;
-        station.tempSet    += tick * station.acc;
-        station.tempSet     = limitSetTemp(station.tempSet, TEMP_SET_MIN, TEMP_SET_MAX);
+        station.tempSet    += tick * station.turnAcceleration;
+        station.tempSet     = limitTempSet(station.tempSet, TEMP_SET_MIN, TEMP_SET_MAX);
         station.tempSetSave = station.tempSet;
         
         #ifdef SERIAL_MESSAGES_INFO
@@ -313,7 +313,7 @@ void encoderTurn(int8_t tick, struct SolderingStation &station) {
     if (station.mode == MODE_SET_CAL || station.mode == MODE_BTN_HOLD) { // TODO !!!!
         initModeCalibration(station);
         // station.previousCalibration = station.calibration;
-        station.userCalibration += tick;
+        setCalibration(tick, station);
         
         #ifdef SERIAL_MESSAGES_INFO
             auxSerialWriteInfo("Calibration", station);
@@ -339,19 +339,46 @@ void encoderTurn(int8_t tick, struct SolderingStation &station) {
     }
 }
 /* -------------------------------------------------------------------------- */
+void setCalibration(int8_t tick, struct SolderingStation &station) {
+    station.userCalibration += tick * station.turnAcceleration;
+
+    if (station.userCalibration > CALIBRATION_LIMIT) {
+        station.userCalibration = CALIBRATION_LIMIT;
+        return;
+    }
+
+    if (station.userCalibration < -CALIBRATION_LIMIT) {
+        station.userCalibration = -CALIBRATION_LIMIT;
+        return;
+    }        
+}
+/* -------------------------------------------------------------------------- */
 void selectSensor(int8_t tick, struct SolderingStation &station) {
     station.sensorIndex += tick;
 
-    if (station.sensorIndex < 1) { // not < 0 !!
-        station.sensorIndex = station.sensorCount;
+    if (station.sensorIndex < 1) {
+        station.sensorIndex = 1; // station.sensorCount - 1;
     }
 
     if (station.sensorIndex > station.sensorCount) {
-        station.sensorIndex = 1;
+        station.sensorIndex = station.sensorCount;
     }
 
-    // station.previousSensor = station.currentSensor;
-    station.currentSensor  = station.sensors[station.sensorIndex - 1]; // -1 (it's not 0 any more)
+    station.currentSensor = station.sensors[station.sensorIndex - 1];
+}
+/* -------------------------------------------------------------------------- */
+void beep(struct SolderingStation &station) {
+    station.timerBuzzer = TIMER_BUZZER;
+    digitalWrite(PIN_BUZZER, HIGH);
+}
+/* -------------------------------------------------------------------------- */
+void checkBuzzer(struct SolderingStation &station) {
+    if (station.timerBuzzer > 0) {
+        station.timerBuzzer--;
+        // Serial.println(station.timerBuzzer);
+    } else {
+        digitalWrite(PIN_BUZZER, LOW);
+    }
 }
 /* -------------------------------------------------------------------------- */
 void regulateLoop_Default(struct SolderingStation &station, Adafruit_SH1106 &display) {

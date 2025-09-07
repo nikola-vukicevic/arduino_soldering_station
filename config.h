@@ -16,15 +16,16 @@
 #define SCREEN_WIDTH        128
 #define SCREEN_HEIGHT       64
 #define SERIAL_RATE         115200
-#define PWUP_DELAY          500
+#define PWUP_DELAY          10
 #define PIN_A               2   // Encoder A
 #define PIN_B               3   // Encoder B
 #define PIN_K               4   // Encoder button
-#define PIN_LED             10  // LED
-#define PIN_T               A0  // Temp sensor
+#define PIN_IRON            10  // LED (default 10)
+#define PIN_BUZZER          11  // Piezo buzzer (default 9)
+#define PIN_T               A0  // Temperature sensor
 #define MASK_PIN_K          0b00010000  // set according to value of PIN_K
 #define MASK_PINS_AB        0b00001100  // set according to values of PIN_A and PIN_B
-#define MASK_PIN_LED        0b00000100  // set according to value of PIN_LED
+#define MASK_PIN_IRON       0b00000100  // set according to value of PIN_IRON
 /* Modes */
 #define MODE_DEFAULT        1
 #define MODE_SET_TEMP       2
@@ -41,14 +42,18 @@
 #define TEMP_DISPLAY_LIMIT  999
 #define TEMP_TOLERANCE_UP   5
 #define TEMP_TOLERANCE_DOWN 5
+#define TEMP_DIFF_BEEP      25
 #define TEMP_READ_RATE      100 // milliseconds
 #define SENSOR_TEMP_REF     330
+#define CALIBRATION_LIMIT   50
+#define TURN_ACCELERATION   5
 /* Timers */
-#define TIMER_SET_T_DEF     600    // Default time (ms) for exiting set temp mode
-#define TIMER_SET_C_DEF     2400   // Default time (ms) for exiting calibration mode
-#define TIMER_SEL_S_DEF     2400   // Default time (ms) for exiting select sensor mode
-#define TIMER_SENS_DEF      1200   // Default time (ms) for entering select sensor mode
-#define TIMER_INACTIVE_DEF  300000 // Default time (ms) for entering inactive mode
+#define TIMER_SET_T_DEF     800    // Default time (ms) for exiting set temp mode
+#define TIMER_SET_C_DEF     1600   // Default time (ms) for exiting calibration mode
+#define TIMER_SEL_S_DEF     1600   // Default time (ms) for exiting select sensor mode
+#define TIMER_SENS_DEF      800    // Default time (ms) for entering select sensor mode
+#define TIMER_INACTIVE_DEF  900000 // Default time (ms) for entering inactive mode (15 min)
+#define TIMER_BUZZER        36     // Default time (loop counts) for buzzer duration
 /* Display */
 #define COORD_X_TEMP        48
 #define COORD_Y_TEMP        31
@@ -106,7 +111,7 @@ struct SolderingStation {
     uint16_t tempSet;
     uint16_t tempSetSave;
     uint16_t tempSensor;
-    uint8_t  acc;
+    uint8_t  turnAcceleration;
     uint8_t  click;
     uint8_t  previousClick;
     uint8_t  isHeaterOn;
@@ -120,8 +125,9 @@ struct SolderingStation {
     uint8_t  tempToleranceDown;
     uint8_t  sensorIndex;
     uint8_t  sensorCount;
+    uint16_t timerBuzzer;
     int8_t   userCalibration;
-    uint8_t  userCalibrationStep;
+    // uint8_t  userCalibrationStep;
     uint8_t  mode; // 1 - default
                    // 2 - set temperature
                    // 3 - calibration

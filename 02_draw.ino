@@ -222,7 +222,14 @@ void drawSensorInfo(struct SolderingStation &station, Adafruit_SH1106 &display) 
 }
 /* -------------------------------------------------------------------------- */
 void drawCalibrationInfo(struct SolderingStation &station, Adafruit_SH1106 &display) {
-    display.setCursor(52, 0);
+    // if (station.userCalibration > -100 && station.userCalibration < 100) {
+    //     display.setCursor(50, 0);
+    // } else {
+    //     display.setCursor(45, 0);
+    // }
+
+    display.setCursor(50, 0);
+    
     display.setTextColor(WHITE);
     display.setTextSize(1);
 

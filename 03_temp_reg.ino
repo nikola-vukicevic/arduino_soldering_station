@@ -19,11 +19,15 @@ void getTempReadout(struct SolderingStation &station) {
     station.previousTempMeasured = station.tempMeasured;
     station.tempSensor           = analogRead(PIN_T);
     station.tempMeasured         = mapSensToTemp(station.tempSensor, station.currentSensor);
-    station.tempMeasured        += station.userCalibration * station.userCalibrationStep;
+    station.tempMeasured        += station.userCalibration; // * station.userCalibrationStep;
 	// (int) mapSensToTemp() ?
 
     if (station.tempMeasured < 0)                  station.tempMeasured = 0;
     if (station.tempMeasured > TEMP_DISPLAY_LIMIT) station.tempMeasured = 0;
+
+    if (abs(station.tempMeasured - station.previousTempMeasured) >= TEMP_DIFF_BEEP) {
+        beep(station);
+    }
 
     #ifdef SAMPLE_SMOOTHING
         sampleSmoothingQueue(station);
@@ -99,16 +103,16 @@ void calculateIronAndLed(struct SolderingStation &station) {
 /* -------------------------------------------------------------------------- */
 void regulateIron(struct SolderingStation &station) {
     if (station.isHeaterOn) {
-        // digitalWrite(PIN_LED, HIGH);
-        PORTB = PORTB | MASK_PIN_LED;
+        // digitalWrite(PIN_IRON, HIGH);
+        PORTB = PORTB | MASK_PIN_IRON;
     }
     else {
-        // digitalWrite(PIN_LED, LOW);
-        PORTB = PORTB & ~MASK_PIN_LED;
+        // digitalWrite(PIN_IRON, LOW);
+        PORTB = PORTB & ~MASK_PIN_IRON;
     }
 }
 /* -------------------------------------------------------------------------- */
-int limitSetTemp(int position, int limit_1, int limit_2) {
+int limitTempSet(int position, int limit_1, int limit_2) {
     if (position < limit_1) {
         return limit_1;
     }
