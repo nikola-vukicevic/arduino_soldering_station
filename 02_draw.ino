@@ -201,6 +201,10 @@ void drawBigTemp(Adafruit_SH1106 &display, int temp) {
     display.setCursor(COORD_X_TEMP, COORD_Y_TEMP);
     display.setTextColor(WHITE);
     display.setTextSize(4);
+    
+    if (temp < 100) display.print(" ");
+    if (temp < 10)  display.print(" ");
+    
     display.print(temp);
 }
 /* -------------------------------------------------------------------------- */

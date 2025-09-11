@@ -7,9 +7,9 @@ void initSensorsInfo(struct SolderingStation &station) {
 
     sprintf(SENSOR_01.name, "A1321");
 	SENSOR_01.tempRef     = SENSOR_TEMP_REF;
-    SENSOR_01.adcRef      = 402.0;
-    SENSOR_01.slopeLow    = 1.0575;
-    SENSOR_01.slopeHigh   = 0.9;
+    SENSOR_01.adcRef      = 485.0;
+    SENSOR_01.slopeLow    = 0.920; // 1.0575;
+    SENSOR_01.slopeHigh   = 0.975;
     SENSOR_01.calibration = 0;
 
 	/* ----- SENSOR #2 (A1322) ----- */	
@@ -18,9 +18,9 @@ void initSensorsInfo(struct SolderingStation &station) {
 
     sprintf(SENSOR_02.name, "A1322");
     SENSOR_02.tempRef     = SENSOR_TEMP_REF;
-	SENSOR_02.adcRef      = 490;
-    SENSOR_02.slopeLow    = 0.672;
-    SENSOR_02.slopeHigh   = 0.45;
+	SENSOR_02.adcRef      = 430;
+    SENSOR_02.slopeLow    = 0.772;
+    SENSOR_02.slopeHigh   = 0.375;
     SENSOR_02.calibration = 0;
 
     #ifndef SAMPLE_SMOOTHING
@@ -134,7 +134,7 @@ void correctTimerInactive(struct SolderingStation &station) {
     station.timerInactive.trigger = false;
     station.mode                  = MODE_INACTIVE;
     station.tempSet               = TEMP_INACTIVE;
-    beep(station);
+    beep(station, TIMER_BUZZER_LONG);
     // Serial.println(station.tempSetSave);
 }
 /* -------------------------------------------------------------------------- */
@@ -243,7 +243,7 @@ int8_t readTurn(struct SolderingStation &station) {
     static const int8_t turnDirectionTable[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0 };
     uint8_t pinsReadout;
     
-    pinsReadout = PIND & MASK_PINS_AB;
+    pinsReadout = PIND & MASK_PINS_ENC_AB;
 
     station.turnReadout >>= 2;
     station.turnReadout  |= pinsReadout;
@@ -367,17 +367,24 @@ void selectSensor(int8_t tick, struct SolderingStation &station) {
     station.currentSensor = station.sensors[station.sensorIndex - 1];
 }
 /* -------------------------------------------------------------------------- */
-void beep(struct SolderingStation &station) {
-    station.timerBuzzer = TIMER_BUZZER;
+void beep(struct SolderingStation &station, uint8_t duration) {
+    station.timerBuzzer = duration;
+    Serial.println(station.timerBuzzer);
+    digitalWrite(PIN_BUZZER, LOW);
+}
+/* -------------------------------------------------------------------------- */
+void killBeep() {
     digitalWrite(PIN_BUZZER, HIGH);
 }
 /* -------------------------------------------------------------------------- */
 void checkBuzzer(struct SolderingStation &station) {
     if (station.timerBuzzer > 0) {
         station.timerBuzzer--;
-        // Serial.println(station.timerBuzzer);
+        Serial.println(station.timerBuzzer);
     } else {
-        digitalWrite(PIN_BUZZER, LOW);
+        station.timerBuzzer = 0;
+        killBeep();
+        // analogWrite(PIN_BUZZER, BUZZER_LEVEL);
     }
 }
 /* -------------------------------------------------------------------------- */

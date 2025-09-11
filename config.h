@@ -17,15 +17,18 @@
 #define SCREEN_HEIGHT       64
 #define SERIAL_RATE         115200
 #define PWUP_DELAY          10
-#define PIN_A               2   // Encoder A
-#define PIN_B               3   // Encoder B
-#define PIN_K               4   // Encoder button
-#define PIN_IRON            10  // LED (default 10)
-#define PIN_BUZZER          11  // Piezo buzzer (default 9)
-#define PIN_T               A0  // Temperature sensor
-#define MASK_PIN_K          0b00010000  // set according to value of PIN_K
-#define MASK_PINS_AB        0b00001100  // set according to values of PIN_A and PIN_B
-#define MASK_PIN_IRON       0b00000100  // set according to value of PIN_IRON
+#define PIN_ENCODER_A       2   // Encoder A
+#define PIN_ENCODER_B       3   // Encoder B
+#define PIN_ENCODER_SW      4   // Encoder button
+#define PIN_HEATER          10  // Heater (default 10)
+#define FAKE_GROUND         7
+#define PIN_BUZZER          8   // Piezo buzzer
+#define FAKE_VCC            9
+#define PIN_TEMPERATURE     A0  // Temperature sensor
+#define MASK_PINS_ENC_AB    0b00001100  // set according to values of PIN_A and PIN_B
+#define MASK_PIN_ENC_SW     0b00010000  // set according to value of PIN_K
+#define MASK_PIN_HEATER     0b00000100  // set according to value of PIN_IRON
+// #define BUZZER_LEVEL        340
 /* Modes */
 #define MODE_DEFAULT        1
 #define MODE_SET_TEMP       2
@@ -52,8 +55,9 @@
 #define TIMER_SET_C_DEF     1600   // Default time (ms) for exiting calibration mode
 #define TIMER_SEL_S_DEF     1600   // Default time (ms) for exiting select sensor mode
 #define TIMER_SENS_DEF      800    // Default time (ms) for entering select sensor mode
-#define TIMER_INACTIVE_DEF  900000 // Default time (ms) for entering inactive mode (15 min)
-#define TIMER_BUZZER        36     // Default time (loop counts) for buzzer duration
+#define TIMER_INACTIVE_DEF  600000 // Default time (ms) for entering inactive mode (15 min)
+#define TIMER_BUZZER_LONG   10     // Default time (loop counts) for buzzer duration
+#define TIMER_BUZZER_SHORT  1      // Default time (loop counts) for short buzzer beep
 /* Display */
 #define COORD_X_TEMP        48
 #define COORD_Y_TEMP        31
@@ -116,8 +120,8 @@ struct SolderingStation {
     uint8_t  previousClick;
     uint8_t  isHeaterOn;
     uint8_t  isLedOn;
-    uint16_t tempMeasured;
-    uint16_t previousTempMeasured;
+    int16_t tempMeasured;
+    int16_t previousTempMeasured;
     uint16_t tempDisplay;
     uint16_t previousTempDisplay;
     int8_t   tempTrend;

@@ -17,7 +17,7 @@ void getTempReadout(struct SolderingStation &station) {
 
     // Serial.println("Read sensor");
     station.previousTempMeasured = station.tempMeasured;
-    station.tempSensor           = analogRead(PIN_T);
+    station.tempSensor           = analogRead(PIN_TEMPERATURE);
     station.tempMeasured         = mapSensToTemp(station.tempSensor, station.currentSensor);
     station.tempMeasured        += station.userCalibration; // * station.userCalibrationStep;
 	// (int) mapSensToTemp() ?
@@ -25,8 +25,10 @@ void getTempReadout(struct SolderingStation &station) {
     if (station.tempMeasured < 0)                  station.tempMeasured = 0;
     if (station.tempMeasured > TEMP_DISPLAY_LIMIT) station.tempMeasured = 0;
 
+    // Serial.println(abs(station.tempMeasured - station.previousTempMeasured));
     if (abs(station.tempMeasured - station.previousTempMeasured) >= TEMP_DIFF_BEEP) {
-        beep(station);
+        Serial.println("BOOM");
+        beep(station, TIMER_BUZZER_SHORT);
     }
 
     #ifdef SAMPLE_SMOOTHING
@@ -103,12 +105,12 @@ void calculateIronAndLed(struct SolderingStation &station) {
 /* -------------------------------------------------------------------------- */
 void regulateIron(struct SolderingStation &station) {
     if (station.isHeaterOn) {
-        // digitalWrite(PIN_IRON, HIGH);
-        PORTB = PORTB | MASK_PIN_IRON;
+        // digitalWrite(PIN_HEATER, HIGH);
+        PORTB = PORTB | MASK_PIN_HEATER;
     }
     else {
-        // digitalWrite(PIN_IRON, LOW);
-        PORTB = PORTB & ~MASK_PIN_IRON;
+        // digitalWrite(PIN_HEATER, LOW);
+        PORTB = PORTB & ~MASK_PIN_HEATER;
     }
 }
 /* -------------------------------------------------------------------------- */
