@@ -12,4 +12,4 @@ The "Arduino part" of my DIY soldering station project
 
 ## Schematic
 
-<img width="751" height="781" alt="sema" src="https://github.com/user-attachments/assets/ca56839b-c948-4d08-b279-b0799ac51266" />
+<img width="751" height="781" alt="sema_2" src="https://github.com/user-attachments/assets/b26ba420-c6bb-4261-af55-643a9ab69f15" />
