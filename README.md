@@ -9,3 +9,7 @@ The "Arduino part" of my DIY soldering station project
 - different modes of operation
 - sample smoothing (experimental (and pretty much unnecessary, but still fun :)))
 - support for two different sensors (four if sample smoothing is turned off)
+
+## Schematic
+
+<img width="751" height="781" alt="sema" src="https://github.com/user-attachments/assets/ca56839b-c948-4d08-b279-b0799ac51266" />
