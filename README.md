@@ -9,6 +9,7 @@ The "Arduino part" of my DIY soldering station project
 - different modes of operation
 - sample smoothing (experimental (and pretty much unnecessary, but still fun :)))
 - support for two different sensors (four if sample smoothing is turned off)
+- powered by laptop charger
 
 ## Schematic
 
