@@ -13,4 +13,4 @@ The "Arduino part" of my DIY soldering station project
 
 ## Schematic
 
-<img width="551" height="581" alt="sema_2" src="https://github.com/user-attachments/assets/b26ba420-c6bb-4261-af55-643a9ab69f15" />
+<img width="551" height="781" alt="489265297-b26ba420-c6bb-4261-af55-643a9ab69f15" src="https://github.com/user-attachments/assets/90c02aaa-defa-4cf0-962f-22442b10fd52" />
