@@ -1,6 +1,9 @@
 # arduino_soldering_station
 The "Arduino part" of my DIY soldering station project
 
+v1.5:
+![IMG_20251003_125516](https://github.com/user-attachments/assets/520b539b-0462-4b56-8b2e-ab0cc9de2778)
+v1.0:
 ![IMG_20250831_141057](https://github.com/user-attachments/assets/ca884260-8cba-4daf-860c-7af6deb4c5b9)
 
 ## Features
